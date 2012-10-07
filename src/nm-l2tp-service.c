@@ -647,11 +647,11 @@ l2tpd_watch_cb (GPid pid, gint status, gpointer user_data)
 	g_free(filename);
 
 	filename = g_strdup_printf ("/var/run/nm-ipsec-l2tp.%d/ipsec.conf", my_pid);
-//	unlink(filename);
+	unlink(filename);
 	g_free(filename);
 
 	filename = g_strdup_printf ("/var/run/nm-ipsec-l2tp.%d/ipsec.secrets", my_pid);
-//	unlink(filename);
+	unlink(filename);
 	g_free(filename);
 
 	filename = g_strdup_printf ("/var/run/nm-ipsec-l2tp.%d", my_pid);
@@ -1451,6 +1451,7 @@ real_connect (NMVPNPlugin   *plugin,
 		g_message(_("starting ipsec"));
 		if (!nm_l2tp_start_ipsec(NM_L2TP_PLUGIN (plugin), s_vpn, error))
 			return FALSE;
+		priv->ipsec_up = TRUE;
 	}
 
 	if (!nm_l2tp_start_l2tpd_binary (NM_L2TP_PLUGIN (plugin), s_vpn, error))
