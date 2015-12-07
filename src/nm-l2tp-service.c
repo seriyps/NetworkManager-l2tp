@@ -930,6 +930,7 @@ nm_l2tp_start_ipsec(NML2tpPlugin *plugin,
 	sys = system("test -e /var/run/pluto/ipsec.info && . /var/run/pluto/ipsec.info;"
 			PATH_PREFIX "; export PATH;"
 			"if [ \"x$defaultrouteaddr\" = \"x\" ]; then ipsec setup restart; fi");
+        sleep(1);
 	if (sys) {
 		return nm_l2tp_ipsec_error(error, "Could not restart the ipsec service.");
 	}
@@ -1157,10 +1158,12 @@ nm_l2tp_config_write (NML2tpPlugin *plugin,
 	if (ipsec_fd == -1) {
 		return nm_l2tp_ipsec_error(error, "Could not write ipsec config.");
 	}
-	write_config_option (ipsec_fd, "version 2.0\n"
+	write_config_option (ipsec_fd, "#obsoleted by libreswan\n"
+"#version 2.0\n"
 "config setup\n"
-"  nat_traversal=yes\n"
-"  force_keepalive=yes\n"
+"#obsoleted by libreswan\n"
+"#  nat_traversal=yes\n"
+"#  force_keepalive=yes\n"
 "  protostack=netkey\n"
 "  keep_alive=60\n"
 "\n");
@@ -1168,7 +1171,7 @@ nm_l2tp_config_write (NML2tpPlugin *plugin,
 	write_config_option (ipsec_fd,
 "  auto=add\n"
 "  type=transport\n"
-"  auth=esp\n"
+"#  auth=esp\n"
 "  pfs=no\n"
 "  authby=secret\n"
 "  keyingtries=0\n"
@@ -1182,13 +1185,12 @@ nm_l2tp_config_write (NML2tpPlugin *plugin,
 	value = nm_setting_vpn_get_data_item (s_vpn, NM_L2TP_KEY_IPSEC_GATEWAY_ID);
 	if(value)write_config_option (ipsec_fd, "  rightid=@%s\n", value);
 	write_config_option (ipsec_fd,
-"  esp=3des-sha1\n"
-"  keyexchange=ike\n"
-"  ike=3des-sha1-modp1024\n"
-"  aggrmode=no\n"
-"  forceencaps=yes\n");
-
-
+"#parameters negotiated automatically by client/server"
+"#  esp=3des-sha1\n"
+"#  keyexchange=ike\n"
+"#  ike=3des-sha1-modp1024\n"
+"#  aggrmode=no\n"
+"#  forceencaps=yes\n");
 
 	filename = g_strdup_printf ("/var/run/nm-xl2tpd.conf.%d", pid);
 	conf_fd = open (filename, O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
